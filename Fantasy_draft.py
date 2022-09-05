@@ -1,23 +1,28 @@
 import pandas as pd
 pd.options.display.width = 0
 import os
+import re
 
 drafted = []
+nones = ['na', 'n', 'none', 'noone', ' ' ,'']
 
-for i in range(0, 5):
-    element = input("Who was picked: ")
-    drafted.append(element)
+for i in range(0, 150):
+    element = input("Who was picked: ").lower()
+    if element.lower() in nones:
+        pass
+    else:
+        drafted.append(element)
     turn = input("Is it your turn (Y/N/Q if finished)?: ")
-    if turn == "N":
+    if turn.lower() == "n":
         continue
-    elif turn == "Q":
+    elif turn.lower() == "q":
         print(drafted)
         break
-    elif turn == "Y":
+    elif turn.lower() == "y":
         need = input("What position do you need (ALL,QB,RB,WR,FLEX,TE,K)?: ")
-        if need == "QB":
+        if need.lower() == "qb":
             qb = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_QB.csv')
-            qb = qb[~qb.Player.str.contains('|'.join(drafted))]
+            qb = qb[~qb.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             qb = qb[qb.FPTS != 0]
             qb.insert(2, column="Position", value="QB")
             qb_move = qb.pop("FPTS")
@@ -28,10 +33,10 @@ for i in range(0, 5):
             qb.insert(7, column="SD_over_next_5", value=((qb.FPTS - qb.FPTS.rolling(5).mean().shift(-5))
                                                          / qb.FPTS.rolling(5).std().shift(-5)))
             qb = qb[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
-            print(qb.head(5))
-        elif need == "RB":
+            print(qb.head(10))
+        elif need.lower() == "rb":
             rb = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_RB.csv')
-            rb = rb[~rb.Player.str.contains('|'.join(drafted))]
+            rb = rb[~rb.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             rb = rb[rb.FPTS != 0]
             rb.insert(2, column="Position", value="RB")
             rb_move = rb.pop("FPTS")
@@ -43,9 +48,9 @@ for i in range(0, 5):
                                                          / rb.FPTS.rolling(5).std().shift(-5)))
             rb = rb[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             print(rb.head(10))
-        elif need == "WR":
+        elif need.lower() == "wr":
             wr = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_WR.csv')
-            wr = wr[~wr.Player.str.contains('|'.join(drafted))]
+            wr = wr[~wr.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             wr = wr[wr.FPTS != 0]
             wr.insert(2, column="Position", value="WR")
             wr_move = wr.pop("FPTS")
@@ -57,9 +62,9 @@ for i in range(0, 5):
                                                          / wr.FPTS.rolling(5).std().shift(-5)))
             wr = wr[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             print(wr.head(10))
-        elif need == "TE":
+        elif need.lower() == "te":
             te = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_TE.csv')
-            te = te[~te.Player.str.contains('|'.join(drafted))]
+            te = te[~te.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             te = te[te.FPTS != 0]
             te.insert(2, column="Position", value="TE")
             te_move = te.pop("FPTS")
@@ -71,9 +76,9 @@ for i in range(0, 5):
                                                          / te.FPTS.rolling(5).std().shift(-5)))
             te = te[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             print(te.head(10))
-        elif need == "K":
+        elif need.lower() == "k":
             k = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_K.csv')
-            k = k[~k.Player.str.contains('|'.join(drafted))]
+            k = k[~k.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             k = k[k.FPTS != 0]
             k.insert(2, column="Position", value="K")
             k_move = k.pop("FPTS")
@@ -85,7 +90,7 @@ for i in range(0, 5):
                                                         / k.FPTS.rolling(5).std().shift(-5)))
             k = k[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             print(k.head(10))
-        elif need == "FLEX":
+        elif need.lower() == "flex":
             wr = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_WR.csv')
             wr.insert(2, column="Position", value="WR")
             wr = wr[['Player', 'Team', 'Position', 'FPTS']]
@@ -94,7 +99,7 @@ for i in range(0, 5):
             rb = rb[['Player', 'Team', 'Position', 'FPTS']]
             fx = [rb, wr]
             flex = pd.concat(fx)
-            flex = flex[~flex.Player.str.contains('|'.join(drafted))]
+            flex = flex[~flex.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             flex = flex[flex.FPTS != 0]
             flex.insert(4, column="abv_avg", value=(flex.FPTS - flex.FPTS.mean()))
             flex.insert(5, column="SD_abv_avg", value=(flex.abv_avg / flex.FPTS.std()))
@@ -104,9 +109,8 @@ for i in range(0, 5):
             flex = flex[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             flex = flex.sort_values(by='SD_abv_avg', ascending=False)
             print(flex.head(10))
-        elif need == "ALL":
+        elif need.lower() == "all":
             qb = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_QB.csv')
-            qb = qb[~qb.Player.str.contains('|'.join(drafted))]
             qb = qb[qb.FPTS != 0]
             qb.insert(2, column="Position", value="QB")
             qb_move = qb.pop("FPTS")
@@ -118,7 +122,6 @@ for i in range(0, 5):
                                                          / qb.FPTS.rolling(5).std().shift(-5)))
             qb = qb[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             wr = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_WR.csv')
-            wr = wr[~wr.Player.str.contains('|'.join(drafted))]
             wr = wr[wr.FPTS != 0]
             wr.insert(2, column="Position", value="WR")
             wr_move = wr.pop("FPTS")
@@ -130,7 +133,6 @@ for i in range(0, 5):
                                                          / wr.FPTS.rolling(5).std().shift(-5)))
             wr = wr[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             rb = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_RB.csv')
-            rb = rb[~rb.Player.str.contains('|'.join(drafted))]
             rb = rb[rb.FPTS != 0]
             rb.insert(2, column="Position", value="RB")
             rb_move = rb.pop("FPTS")
@@ -142,7 +144,6 @@ for i in range(0, 5):
                                                          / rb.FPTS.rolling(5).std().shift(-5)))
             rb = rb[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             te = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_TE.csv')
-            te = te[~te.Player.str.contains('|'.join(drafted))]
             te = te[te.FPTS != 0]
             te.insert(2, column="Position", value="TE")
             te_move = te.pop("FPTS")
@@ -154,7 +155,6 @@ for i in range(0, 5):
                                                          / te.FPTS.rolling(5).std().shift(-5)))
             te = te[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             k = pd.read_csv('./Projections/FantasyPros_Fantasy_Football_Projections_K.csv')
-            k = k[~k.Player.str.contains('|'.join(drafted))]
             k = k[k.FPTS != 0]
             k.insert(2, column="Position", value="K")
             k_move = k.pop("FPTS")
@@ -167,6 +167,7 @@ for i in range(0, 5):
             k = k[['Player', 'Team', 'Position', 'FPTS', 'abv_avg', 'SD_abv_avg', 'SD_over_next', 'SD_over_next_5']]
             dfs = [qb, rb, wr, te, k]
             guys = pd.concat(dfs).sort_values(by='SD_abv_avg', ascending=False)
+            guys = guys[~guys.Player.str.contains('|'.join(drafted), flags=re.IGNORECASE)]
             print(guys.head(10))
         else:
             continue
